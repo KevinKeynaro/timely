@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAF9F6),
-      appBar: _selectedIndex == 0
+      appBar: (_selectedIndex == 0 || _selectedIndex == 3)
           ? null
           : AppBar(
               backgroundColor: const Color(0xFFFAF9F6),
@@ -40,6 +40,8 @@ class _HomePageState extends State<HomePage> {
           ? const _HomePage()
           : _selectedIndex == 2
           ? const _InboxPage()
+          : _selectedIndex == 3
+          ? const ProfilePage()
           : Center(
               child: Text(
                 _titles[_selectedIndex],
@@ -427,6 +429,133 @@ class _InboxPage extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const _Avatar(),
+            const SizedBox(height: 16),
+            const Text(
+              'Kevin',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 32),
+            const _InfoCard(
+              icon: Icons.phone_outlined,
+              label: 'Phone',
+              value: '+1 234567',
+            ),
+            const SizedBox(height: 12),
+            const _InfoCard(
+              icon: Icons.email_outlined,
+              label: 'Email',
+              value: 'email@example.com',
+            ),
+            const SizedBox(height: 12),
+            const _InfoCard(
+              icon: Icons.location_on_outlined,
+              label: 'Address',
+              value: 'London, United Kingdom',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Circular avatar (icon) with a small white edit badge on its bottom-right.
+class _Avatar extends StatelessWidget {
+  const _Avatar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 56,
+            backgroundColor: Colors.grey.shade300,
+            child: Icon(Icons.person, size: 64, color: Colors.grey.shade600),
+          ),
+          Positioned(
+            right: 4,
+            bottom: 4,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.edit, size: 18, color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A rounded rectangle showing an icon, a small label and a value.
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey.shade700),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 2),
+              Text(value, style: const TextStyle(fontSize: 16)),
+            ],
+          ),
+        ],
       ),
     );
   }
