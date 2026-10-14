@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:timely/homepage.dart';
-import 'package:timely/register_page.dart';
+import 'package:timely/pages/login_page.dart';
 
 const double _fieldHeight = 54;
 const double _radius = 14;
 const Color _border = Color(0xFFE0E0E0);
 const Color _hint = Color(0xFF9E9E9E);
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   bool _obscureText = true;
+  bool _obscureReenterText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 8),
 
                   Text(
-                    'Time your schedule with ease',
+                    'Create your account',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.roboto(
                       fontSize: 18,
@@ -93,50 +93,38 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
 
+                  const SizedBox(height: 20),
+
+                  _label('Re-enter the password'),
+                  const SizedBox(height: 8),
+                  _field(
+                    secondary: secondary,
+                    obscureText: _obscureReenterText,
+                    keyboardType: TextInputType.visiblePassword,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    hintText: 'Re-enter your password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureReenterText
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () => setState(
+                        () => _obscureReenterText = !_obscureReenterText,
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 24),
 
                   _button(
                     backgroundColor: secondary,
                     foregroundColor: Colors.white,
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      );
+                      Navigator.pop(context);
                     },
-                    child: _buttonLabel('Continue', color: Colors.white),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Row(
-                    children: [
-                      const Expanded(child: Divider(color: _border)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          'or',
-                          style: GoogleFonts.roboto(fontSize: 14, color: _hint),
-                        ),
-                      ),
-                      const Expanded(child: Divider(color: _border)),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  _button(
-                    onPressed: () {},
-                    child: _socialRow('google-logo.png', 'Sign in with Google'),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _button(
-                    onPressed: () {},
-                    child: _socialRow('apple-logo.png', 'Sign in with Apple'),
+                    child: _buttonLabel('Create Account', color: Colors.white),
                   ),
 
                   const SizedBox(height: 20),
@@ -145,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account?",
+                        'Already have an account?',
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           color: Colors.black87,
@@ -153,10 +141,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RegisterPage(),
+                              builder: (context) => const LoginPage(),
                             ),
                           );
                         },
@@ -167,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(
-                          'Sign Up',
+                          'Sign In',
                           style: GoogleFonts.roboto(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -201,7 +189,6 @@ class _LoginPageState extends State<LoginPage> {
     bool obscureText = false,
     bool autocorrect = true,
     bool enableSuggestions = true,
-    Widget? prefixIcon,
     Widget? suffixIcon,
   }) {
     final borderRadius = BorderRadius.circular(_radius);
@@ -217,9 +204,7 @@ class _LoginPageState extends State<LoginPage> {
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(color: _hint, fontSize: 16),
-          prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
-          prefixIconColor: _hint,
           suffixIconColor: _hint,
           filled: true,
           fillColor: Colors.white,
@@ -282,15 +267,4 @@ class _LoginPageState extends State<LoginPage> {
           color: color,
         ),
       );
-
-  Widget _socialRow(String logo, String label) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset('assets/images/$logo', height: 24, width: 24),
-        const SizedBox(width: 12),
-        _buttonLabel(label),
-      ],
-    );
-  }
 }

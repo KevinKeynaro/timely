@@ -1,22 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:timely/login_page.dart';
+import 'package:timely/pages/homepage.dart';
+import 'package:timely/pages/register_page.dart';
+import 'package:timely/services/api.dart';
 
 const double _fieldHeight = 54;
 const double _radius = 14;
 const Color _border = Color(0xFFE0E0E0);
 const Color _hint = Color(0xFF9E9E9E);
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   bool _obscureText = true;
-  bool _obscureReenterText = true;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> login() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email and password are required!')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final res = await ApiService.post('/login', {
+        'email': email,
+        'password': password,
+      });
+      final token = res['token'] ?? res['data']?['token'];
+      if (token != null) {
+        await ApiService.saveToken(token.toString());
+      }
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(width: 10),
                       Text(
                         'Timely',
-                        style: GoogleFonts.irishGrover(
-                          fontSize: 30,
-                        ),
+                        style: GoogleFonts.irishGrover(fontSize: 30),
                       ),
                     ],
                   ),
@@ -55,7 +103,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 8),
 
                   Text(
-                    'Create your account',
+                    'Time your schedule with ease',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.roboto(
                       fontSize: 18,
@@ -70,6 +118,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 8),
                   _field(
                     secondary: secondary,
+                    controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                     hintText: 'email@example.com',
                   ),
@@ -81,6 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   _field(
                     secondary: secondary,
                     obscureText: _obscureText,
+                    controller: passwordController,
                     keyboardType: TextInputType.visiblePassword,
                     autocorrect: false,
                     enableSuggestions: false,
@@ -89,30 +139,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       icon: Icon(
                         _obscureText ? Icons.visibility_off : Icons.visibility,
                       ),
-                      onPressed: () => setState(() => _obscureText = !_obscureText),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  _label('Re-enter the password'),
-                  const SizedBox(height: 8),
-                  _field(
-                    secondary: secondary,
-                    obscureText: _obscureReenterText,
-                    keyboardType: TextInputType.visiblePassword,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    hintText: 'Re-enter your password',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureReenterText
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () => setState(
-                        () => _obscureReenterText = !_obscureReenterText,
-                      ),
+                      onPressed: () =>
+                          setState(() => _obscureText = !_obscureText),
                     ),
                   ),
 
@@ -121,10 +149,47 @@ class _RegisterPageState extends State<RegisterPage> {
                   _button(
                     backgroundColor: secondary,
                     foregroundColor: Colors.white,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: _buttonLabel('Create Account', color: Colors.white),
+                    onPressed: _isLoading ? () {} : login,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : _buttonLabel('Continue', color: Colors.white),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Row(
+                    children: [
+                      const Expanded(child: Divider(color: _border)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'or',
+                          style: GoogleFonts.roboto(fontSize: 14, color: _hint),
+                        ),
+                      ),
+                      const Expanded(child: Divider(color: _border)),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  _button(
+                    onPressed: () {},
+                    child: _socialRow('google-logo.png', 'Sign in with Google'),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  _button(
+                    onPressed: () {},
+                    child: _socialRow('apple-logo.png', 'Sign in with Apple'),
                   ),
 
                   const SizedBox(height: 20),
@@ -133,7 +198,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account?',
+                        "Don't have an account?",
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           color: Colors.black87,
@@ -141,10 +206,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
+                              builder: (context) => const RegisterPage(),
                             ),
                           );
                         },
@@ -155,7 +220,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(
-                          'Sign In',
+                          'Sign Up',
                           style: GoogleFonts.roboto(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -174,27 +239,30 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _label(String text) => Text(
-        text,
-        style: GoogleFonts.roboto(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black87,
-        ),
-      );
+    text,
+    style: GoogleFonts.roboto(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: Colors.black87,
+    ),
+  );
 
   Widget _field({
     required Color secondary,
     required String hintText,
+    TextEditingController? controller,
     TextInputType? keyboardType,
     bool obscureText = false,
     bool autocorrect = true,
     bool enableSuggestions = true,
+    Widget? prefixIcon,
     Widget? suffixIcon,
   }) {
     final borderRadius = BorderRadius.circular(_radius);
     return SizedBox(
       height: _fieldHeight,
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         autocorrect: autocorrect,
@@ -204,7 +272,9 @@ class _RegisterPageState extends State<RegisterPage> {
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(color: _hint, fontSize: 16),
+          prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
+          prefixIconColor: _hint,
           suffixIconColor: _hint,
           filled: true,
           fillColor: Colors.white,
@@ -260,11 +330,22 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buttonLabel(String text, {Color? color}) => Text(
-        text,
-        style: GoogleFonts.roboto(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: color,
-        ),
-      );
+    text,
+    style: GoogleFonts.roboto(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: color,
+    ),
+  );
+
+  Widget _socialRow(String logo, String label) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset('assets/images/$logo', height: 24, width: 24),
+        const SizedBox(width: 12),
+        _buttonLabel(label),
+      ],
+    );
+  }
 }

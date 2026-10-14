@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:timely/pages/login_page.dart';
 
 const Color _inactive = Color(0xFF9E9E9E);
 
@@ -474,6 +475,8 @@ class ProfilePage extends StatelessWidget {
               label: 'Address',
               value: 'London, United Kingdom',
             ),
+            const SizedBox(height: 32),
+            const _LogoutButton(),
           ],
         ),
       ),
@@ -556,6 +559,71 @@ class _InfoCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A small, minimalist logout button with a hover effect.
+class _LogoutButton extends StatefulWidget {
+  const _LogoutButton();
+
+  @override
+  State<_LogoutButton> createState() => _LogoutButtonState();
+}
+
+class _LogoutButtonState extends State<_LogoutButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: _hovering
+                ? const Color(0xFFFEE2E2)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _hovering
+                  ? const Color(0xFFFCA5A5)
+                  : const Color(0xFFE5E7EB),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.logout_rounded,
+                size: 18,
+                color: _hovering
+                    ? const Color(0xFFDC2626)
+                    : const Color(0xFF6B7280),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Log out',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: _hovering
+                      ? const Color(0xFFDC2626)
+                      : const Color(0xFF6B7280),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
